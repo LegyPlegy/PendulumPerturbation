@@ -34,17 +34,26 @@ This code is split into three sections.
         realtime plot format.
 """
 
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy as sp
+
 
 
 '''
+===============================================================================
 [0] simulation settings
     Inputs -
         user defined constants
         universal constants
     Outputs - 
         global variables to be used in [1] [2] (3)
-        
+===============================================================================        
 '''
+
+
+
+
 
 
 
@@ -59,10 +68,6 @@ This code is split into three sections.
         array of computed trajectory from section
 ===============================================================================     
 '''
-import numpy as np
-import matplotlib as plt
-import scipy as py
-
 def simulate_pendulum(time_series, init_cond, global_settings):
     """
     a method that simulates the trajectory of ONE pendulum for a given
@@ -94,6 +99,10 @@ def simulate_pendulum(time_series, init_cond, global_settings):
     
     return sim_trajectory
             
+
+
+
+
 '''
 ===============================================================================
 [2] analytics (Maia Adams)
@@ -111,6 +120,8 @@ t = np.linspace(0, 5, 0.1)
 traj = []
 
 def lyapunov_exponent()
+
+
 
 
 
