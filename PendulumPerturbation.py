@@ -58,6 +58,9 @@ This code is split into three sections.
     Outputs - 
 ===============================================================================     
 '''
+import numpy as np
+import matplotlib as plt
+import scipy as py
 
 def simulate_pendulum(time_series, init_cond, global_settings):
     """
@@ -103,7 +106,7 @@ def simulate_pendulum(time_series, init_cond, global_settings):
         divergence of phase-space curves??
 ===============================================================================
 '''
-
+t = linspace(0, 5, 0.1)
 
 
 
