@@ -106,7 +106,7 @@ def simulate_pendulum(time_series, init_cond, global_settings):
         divergence of phase-space curves??
 ===============================================================================
 '''
-t = linspace(0, 5, 0.1)
+t = np.linspace(0, 5, 0.1)
 
 
 
