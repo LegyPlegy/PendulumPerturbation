@@ -86,7 +86,7 @@ def simulate_pendulum(time_series, init_cond, global_settings):
     """
     
     
-    sim_trajectory = [0, 1, 2]  # contains computed values for f(θ1) and f(θ2) 
+    sim_trajectory = [0, 1, 2, 3]  # contains computed values for f(θ1) and f(θ2) 
     
     return sim_trajectory
             
