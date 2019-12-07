@@ -55,7 +55,8 @@ This code is split into three sections.
         time series 
         global settings
         
-    Outputs - 
+    Outputs -
+        array of computed trajectory from section
 ===============================================================================     
 '''
 import numpy as np
@@ -107,7 +108,9 @@ def simulate_pendulum(time_series, init_cond, global_settings):
 ===============================================================================
 '''
 t = np.linspace(0, 5, 0.1)
+traj = []
 
+def lyapunov_exponent()
 
 
 
