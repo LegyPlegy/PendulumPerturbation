@@ -115,9 +115,15 @@ def simulate_pendulum(time_series, init_cond, global_settings):
         divergence of phase-space curves??
 ===============================================================================
 '''
-t = np.linspace(0, 5, 0.1)
 
 
+def lyapunov_exp(sim_trajectory, time):
+    delta = np.abs(sim_trajectory[1]-sim_trajectory[0]) # takes the difference
+                                                        #between trajectories   
+                                                        #f(θ1) and f(θ2)
+    lyapunov = np.log(delta)/time #lyapunov exponent
+    
+    return lyanpunov
 
 
 
