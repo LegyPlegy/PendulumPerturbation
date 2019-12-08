@@ -62,21 +62,20 @@ import numpy as np
 import matplotlib as plt
 import scipy as sp
 
-def double_pen(m1, m2, l1, l2, theta1, theta2, g, t):
+def double_pen(z, t, glo):
+    theta1, T1, theta2, T2 = z
+    m1, m2, l1, l2, g = glo
     C = np.cos(theta1 - theta2)
     c2 = np.cos(2*theta1 - 2*theta2)
     S = np.sin(theta1-theta2)
     M = m1+m2
 #Simplifications for repetition between ODES for theta1doubledot and theta2doubledot 
-    
-    theta1d = T1
-    theta2d = T2
-    T1d = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2))
-    T2d = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))
+    f = [T1,T1d = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2)), \
+         T2, T2d = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))]
 #Four 1st Order Equations for the Coupled Second Order ODEs
 #T1 is the first derivative of theta1, T2 is the first for theta2
 #T1d is the second derivative of theta1, T2d is the second for theta2
-    return theta1d, theta2d, T1d, T2d  
+    return T1, T2, T1d, T2d  
 
   
 '''
