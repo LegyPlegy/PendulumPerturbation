@@ -64,7 +64,8 @@ import scipy as sp
         time series 
         global settings
         
-    Outputs - 
+    Outputs -
+        array of computed trajectory from section
 ===============================================================================     
 '''
 
@@ -138,6 +139,10 @@ return sim_trajectory
 ===============================================================================
 '''
 
+t = np.linspace(0, 5, 0.1)
+traj = []
+
+def lyapunov_exponent()
 
 def lyapunov_exp(sim_trajectory, time):
     
