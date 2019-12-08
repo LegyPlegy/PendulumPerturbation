@@ -36,7 +36,9 @@ This code is split into three sections.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import scipy as sp
+from time import time
 
 
 
@@ -186,3 +188,48 @@ def lyapunov_exp(sim_trajectory, time):
         nxn plot of realtime pendulums
 ===============================================================================
 '''
+
+# create figure 
+fig = plt.figure() 
+ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
+                     xlim=(-50, 50), ylim=(-50, 50))  
+ax.grid()
+
+line, = ax.plot([], [], 'o-', lw=2)
+time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
+
+def init():
+    """initialize animation"""
+    line.set_data([], [])
+    time_text.set_text('')
+    return line, time_text
+
+def animate(i):
+    """perform animation step"""
+    
+    # t is a parameter 
+    t = 0.1*i
+	
+    # x, y values to be plotted 
+    x = t*np.sin(t) 
+    y = t*np.cos(t) 
+	
+    xdata.append(x) 
+    ydata.append(y) 
+    
+    line.set_data(xdata, ydata) 
+    
+    #time_text.set_text('time = %.1f' % pendulum.time_elapsed)
+    
+    return line, time_text
+
+xdata, ydata = [], []
+
+anim = animation.FuncAnimation(fig, animate, init_func=init, 
+							frames=500, interval=20, blit=True) 
+
+anim.save('coil.gif') 
+
+print("Done")
+
+
