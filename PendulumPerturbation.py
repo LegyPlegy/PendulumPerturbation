@@ -63,7 +63,15 @@ import matplotlib as plt
 import scipy as py
 
 def simulate_pendulum(time_series, init_cond, global_settings):
-    """
+def double_pen(m1,m2,l1,l2,theta1,theta2, g):
+    C = np.cos(theta1-theta2)
+    S = np.sin(theta1-theta2)
+    M = m1+m2
+    theta1d = T1
+    theta2d = T2
+    T1d = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*(theta2d**2*l2+theta1d**2*l1*C))/
+    T2d =
+    '''
     a method that simulates the trajectory of ONE pendulum for a given
     init cond and time series
         
@@ -71,7 +79,9 @@ def simulate_pendulum(time_series, init_cond, global_settings):
             time_series: 
                 [float array] a numpy array containing time steps
                 created using numpy.linspace
-            
+        '''
+        np.linspace(0,5,501)
+        '''
             init_cond: 
                 [tuple] a tuple of the form (Є1, Є2) where 
                 Є1 is shift in θ1 and Є2 is shift in θ2
@@ -79,14 +89,15 @@ def simulate_pendulum(time_series, init_cond, global_settings):
             global_settings: 
                 [tuple] a tuple containing the simulation parameters
                         see section [0] for more info
-            
-            
+       '''
+       
+       '''     
         Outputs -
             sim_trajectory:
                 [2xn array] a 2D array where column 1 and 2 contain the final 
                 trajectory for θ1 and θ2, where n is the total steps
                 
-    """
+    '''
     
     
     sim_trajectory = [0, 1, 2]  # contains computed values for f(θ1) and f(θ2) 
