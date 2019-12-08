@@ -161,10 +161,6 @@ def simulate_pendulum(time_series, init_cond, global_settings):
 ===============================================================================
 '''
 
-def lyapunov_exponent():
-    
-    pass
-
 def lyapunov_exp(sim_trajectory, time):
     
     delta = np.abs(sim_trajectory[1]-sim_trajectory[0]) 
@@ -189,47 +185,47 @@ def lyapunov_exp(sim_trajectory, time):
 ===============================================================================
 '''
 
+def init():
+    """initialize animation"""
+    line.set_data([], [])  # start with empty sets
+    time_text.set_text('')  # make sure time is 0 at the beginning
+    return line, time_text
+
+def animate(i):
+    """used for FuncAnimation: this is iterated over i frames"""
+    
+    # define function and store in xdata and ydata, iterating over i
+    t = 0.1*i
+    x = t*np.sin(t) 
+    y = t*np.cos(t) 
+    xdata.append(x) 
+    ydata.append(y) 
+    
+    # update the line with new data
+    line.set_data(xdata, ydata) 
+    
+    # keep track of time
+    time_text.set_text("time = {0:.2f}s".format(t) )
+    
+    return line, time_text
+
 # create figure 
 fig = plt.figure() 
 ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
                      xlim=(-50, 50), ylim=(-50, 50))  
-ax.grid()
+ax.grid()  # add grid to figure
 
-line, = ax.plot([], [], 'o-', lw=2)
-time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
+# now, begin our animation
+line, = ax.plot([], [], lw=2)  # required for FuncAnimation
+time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes) # add text to top left
 
-def init():
-    """initialize animation"""
-    line.set_data([], [])
-    time_text.set_text('')
-    return line, time_text
-
-def animate(i):
-    """perform animation step"""
-    
-    # t is a parameter 
-    t = 0.1*i
-	
-    # x, y values to be plotted 
-    x = t*np.sin(t) 
-    y = t*np.cos(t) 
-	
-    xdata.append(x) 
-    ydata.append(y) 
-    
-    line.set_data(xdata, ydata) 
-    
-    #time_text.set_text('time = %.1f' % pendulum.time_elapsed)
-    
-    return line, time_text
-
-xdata, ydata = [], []
-
+# begin the animation method
+xdata, ydata = [], []  # store data in here
 anim = animation.FuncAnimation(fig, animate, init_func=init, 
 							frames=500, interval=20, blit=True) 
 
-anim.save('coil.gif') 
-
+# save animation
+anim.save('double_pendulum.gif') 
 print("Done")
 
 
