@@ -57,8 +57,7 @@ m1, m2 = 1, 1  # pendulum mass 1 and mass 2  [kg]
 l1, l2 = 1, 1  # pendulum length 1 and length 2 [meters]
 g = 9.81  # gravitational acceleration
 
-
-init_conditions = (g, m1, m2, l1, l2)
+global_constants = (g, m1, m2, l1, l2)
 
 
 
@@ -75,27 +74,40 @@ init_conditions = (g, m1, m2, l1, l2)
 ===============================================================================     
 '''
 
-def double_pen(z, t, glo):
-    theta1, T1, theta2, T2 = z
-    m1, m2, l1, l2, g = glo
+def double_pen(z, t, param):
+    """
+    Defines the diff eq for the double pendulum
+    
+    Inputs:
+        z - list of state variables
+            [theta1_dot, theta1_dotdot, theta2_dot, theta2_dotdot]
+            
+        t - time series
+        
+        param 
+        
+    Outputs:
+        f - function f(t1dot, t1dotdot, t2dot, t2dotdot)
+                
+    """
+    theta1, theta1_dot, theta2, theta2_dotdot = z
+    m1, m2, l1, l2, g = param
     C = np.cos(theta1 - theta2)
     c2 = np.cos(2*theta1 - 2*theta2)
     S = np.sin(theta1-theta2)
     M = m1+m2
     
 #Simplifications for repetition between ODES for theta1doubledot and theta2doubledot 
-    f = [T1,T1d = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2)), \
-         T2, T2d = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))]
 #Four 1st Order Equations for the Coupled Second Order ODEs
+    
     theta1_dot = T1
     theta2_dot = T2
     theta1_dotdot = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2))
     theta2_dotdot = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))
     
-#T1 is the first derivative of theta1, T2 is the first for theta2
-#T1d is the second derivative of theta1, T2d is the second for theta2
+    f = [theta1_dot, theta1_dotdot, theta2_dot, theta2_dotdot]
     
-    return theta1_dot, theta2_dot, theta1_dotdot, theta2_dotdot  
+    return f
 
 
 def simulate_pendulum(time_series, init_cond, global_settings):
@@ -147,21 +159,18 @@ def simulate_pendulum(time_series, init_cond, global_settings):
 ===============================================================================
 '''
 
-t = np.linspace(0, 5, 0.1)
-traj = []
-
 def lyapunov_exponent():
     
     pass
 
 def lyapunov_exp(sim_trajectory, time):
     
-        delta = np.abs(sim_trajectory[1]-sim_trajectory[0]) # takes the difference
-                                                        #between trajectories   
-                                                        #f(θ1) and f(θ2)
-        lyapunov = np.log(delta)/time #lyapunov exponent
+    delta = np.abs(sim_trajectory[1]-sim_trajectory[0]) 
+    # takes the difference between trajectories f(θ1) and f(θ2)
+    
+    lyapunov = np.log(delta)/time #lyapunov exponent
    
-    return lyanpunov
+    return lyapunov
 
 
 
