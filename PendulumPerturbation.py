@@ -62,6 +62,7 @@ g = 9.81  # gravitational acceleration
 global_constants = (g, m1, m2, l1, l2)
 
 
+num_frames = 100
 
 
 '''
@@ -185,47 +186,51 @@ def lyapunov_exp(sim_trajectory, time):
 ===============================================================================
 '''
 
-def init():
-    """initialize animation"""
-    line.set_data([], [])  # start with empty sets
-    time_text.set_text('')  # make sure time is 0 at the beginning
-    return line, time_text
 
-def animate(i):
+def animate(i, data_list, lines):
     """used for FuncAnimation: this is iterated over i frames"""
     
-    # define function and store in xdata and ydata, iterating over i
-    t = 0.1*i
-    x = t*np.sin(t) 
-    y = t*np.cos(t) 
-    xdata.append(x) 
-    ydata.append(y) 
     
-    # update the line with new data
-    line.set_data(xdata, ydata) 
-    
+    for num, line in enumerate(lines):        
+        # update the line with new data
+        lines[num][0].set_xdata(data_list[num][0][:i])
+        lines[num][0].set_ydata(data_list[num][1][:i])
+        
     # keep track of time
-    time_text.set_text("time = {0:.2f}s".format(t) )
+    #time_text.set_text("time = {0:.2f}s".format(t))
     
-    return line, time_text
+    return lines[:]
+
 
 # create figure 
 fig = plt.figure() 
-ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                     xlim=(-50, 50), ylim=(-50, 50))  
+ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-10, 10), ylim=(-10, 10))  
 ax.grid()  # add grid to figure
 
-# now, begin our animation
-line, = ax.plot([], [], lw=2)  # required for FuncAnimation
-time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes) # add text to top left
+# create fake data
+omegas, trajectories = [2, 5, 9, 6], []
+t = np.linspace(0, 5*np.pi, num_frames)
 
-# begin the animation method
-xdata, ydata = [], []  # store data in here
-anim = animation.FuncAnimation(fig, animate, init_func=init, 
-							frames=500, interval=20, blit=True) 
+for omega in omegas:
+    # trajectories is a list of 2 arrays, the first being sinAt and second being cosAt
+    trajectories.append((t*np.sin(omega*t), t*np.cos(omega*t)))
+
+# create a set of line objects for all our datasets
+
+trajectory_lines = []
+for trajectory in trajectories:
+    trajectory_lines.append(ax.plot([], [], lw=1))  # required for FuncAnimation
+
+
+#time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes) # add text to top left
+
+# init the animation method 
+anim = animation.FuncAnimation(fig, animate, fargs=[trajectories, trajectory_lines], \
+                               frames=num_frames, interval=20, blit=True) 
 
 # save animation
-anim.save('double_pendulum.gif') 
+#anim.save('double_pendulum.gif') 
 print("Done")
+
 
 
