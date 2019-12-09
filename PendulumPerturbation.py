@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import scipy as sp
 from time import time
-
+from scipy import integrate
 
 
 '''
@@ -77,7 +77,7 @@ num_frames = 100
 ===============================================================================     
 '''
 
-def double_pen(z, t, param):
+def double_pen(z, t, m1, m2, l1, l2, g):
     """
     Defines the diff eq for the double pendulum
     
@@ -87,14 +87,14 @@ def double_pen(z, t, param):
             
         t - time series
         
-        param 
+        param - global variables
+            [m1, m2, l1, l2, g]
         
     Outputs:
         f - function f(t1dot, t1dotdot, t2dot, t2dotdot)
                 
     """
-    theta1, theta1_dot, theta2, theta2_dotdot = z
-    m1, m2, l1, l2, g = param
+    theta1, T1, theta2, T2 = z
     C = np.cos(theta1 - theta2)
     c2 = np.cos(2*theta1 - 2*theta2)
     S = np.sin(theta1-theta2)
@@ -103,19 +103,25 @@ def double_pen(z, t, param):
 #Simplifications for repetition between ODES for theta1doubledot and theta2doubledot 
 #Four 1st Order Equations for the Coupled Second Order ODEs
     
-    theta1_dot = T1
-    theta2_dot = T2
-    theta1_dotdot = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2))
-    theta2_dotdot = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))
+    T1d = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2))
+    T2d = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))
     
-    f = [theta1_dot, theta1_dotdot, theta2_dot, theta2_dotdot]
+    f = [T1, T1d, T2, T2d]
     
     return f
 
-
-def simulate_pendulum(time_series, init_cond, global_settings):
-    """
-  
+# Initial Conditions
+# theta1 and theta2 assign the inital angle of the double pendulum
+theta1 = 0.1
+theta2 = 0.1
+#T1 and T2 are the initial velocities
+T1 = 0.0
+T2 = 0.0
+t = np.linspace(0, 50, 501)
+y0 = theta1, theta2, T1, T2
+z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
+'''
+ 
     a method that simulates the trajectory of ONE pendulum for a given
     init cond and time series
         
@@ -137,13 +143,7 @@ def simulate_pendulum(time_series, init_cond, global_settings):
                 [2xn array] a 2D array where column 1 and 2 contain the final 
                 trajectory for θ1 and θ2, where n is the total steps
                 
-    """
-    
-        
-    sim_trajectory = [0, 1, 2]  # contains computed values for f(θ1) and f(θ2) 
-    
-    return sim_trajectory
-            
+'''             
 
 
 
