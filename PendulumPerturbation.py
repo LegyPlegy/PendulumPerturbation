@@ -63,6 +63,7 @@ global_constants = (g, m1, m2, l1, l2)
 
 
 num_frames = 100
+num_pendulums = 1
 
 
 '''
@@ -112,14 +113,15 @@ def double_pen(z, t, m1, m2, l1, l2, g):
 
 # Initial Conditions
 # theta1 and theta2 assign the inital angle of the double pendulum
-theta1 = 0.1
+theta1 = 15
 theta2 = 0.1
 #T1 and T2 are the initial velocities
 T1 = 0.0
 T2 = 0.0
 t = np.linspace(0, 50, 501)
-y0 = theta1, theta2, T1, T2
+y0 = [theta1, theta2, T1, T2]
 z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
+
 '''
  
     a method that simulates the trajectory of ONE pendulum for a given
@@ -185,51 +187,86 @@ def lyapunov_exp(sim_trajectory, time):
         nxn plot of realtime pendulums
 ===============================================================================
 '''
-
-
-def animate(i, data_list, lines):
-    """used for FuncAnimation: this is iterated over i frames"""
-    
-    
-    for num, line in enumerate(lines):        
-        # update the line with new data
-        lines[num][0].set_xdata(data_list[num][0][:i])
-        lines[num][0].set_ydata(data_list[num][1][:i])
-        
-    # keep track of time
-    #time_text.set_text("time = {0:.2f}s".format(t))
-    
-    return lines[:]
-
-
 # create figure 
 fig = plt.figure() 
-ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-10, 10), ylim=(-10, 10))  
+ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, 
+                     xlim=(-2, 2), ylim=(-2, 2))  
 ax.grid()  # add grid to figure
 
-# create fake data
-omegas, trajectories = [2, 5, 9, 6], []
-t = np.linspace(0, 5*np.pi, num_frames)
+# first, create a series of line objects and store them
+lines = []
+for index in range(num_pendulums):
+    lobj = ax.plot([],[],lw=3)[0]
+    lines.append(lobj)
 
-for omega in omegas:
-    # trajectories is a list of 2 arrays, the first being sinAt and second being cosAt
-    trajectories.append((t*np.sin(omega*t), t*np.cos(omega*t)))
+# call our method to make some pendulum trajectories
+trajectories = []
+for num in range(num_pendulums):
+    y0[0] += 0.1  # increase theta 1 by 0.1 rad every time
+    z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
+    
+    # unpack our theta 1 and theta 2
+    theta1, theta2 = z[:,0], z[:,2]
+    x1 = global_constants[3] * np.sin(theta1)
+    y1 = -global_constants[4] * np.cos(theta1)
+    
+    x2 = x1 + global_constants[4] * np.sin(theta2)
+    y2 = y1 - global_constants[4] * np.cos(theta2)
+    plt.plot(x1, y1)
+    plt.plot(x2, y2)
+    trajectories.append((x1, y1))
 
-# create a set of line objects for all our datasets
 
-trajectory_lines = []
-for trajectory in trajectories:
-    trajectory_lines.append(ax.plot([], [], lw=1))  # required for FuncAnimation
+# create an initializer to empty every line object
+def init():
+    for line in lines:
+        line.set_data([],[])
+    return lines
+
+# create a list of lists to keep track of data
+all_xsets, all_ysets = [], []
+for line in lines:
+    all_xsets.append([])
+    all_ysets.append([])
+
+# create our animation function, that updates every line object every frame
+def animate(i, data_list, all_xsets, all_ysets, lines):
+    """
+    Inputs:
+        i - variable used to animate in FuncAnimate
+        data_list - list of tuples with each tuple having a x and y array 
+        lines - list of line objects
+        
+    Outputs:
+        idk, it's used inside FuncAnimate
+    """
+    
+    
+    for line_num, line in enumerate(lines):
+        # extract data from data-list
+        next_xval = data_list[line_num][0][i]
+        next_yval = data_list[line_num][1][i]
+        
+        # store that into each line's designated "all_xset" and "all_yset"
+        all_xsets[line_num][0].append(next_xval)
+        all_ysets[line_num][1].append(next_yval)
+        len(all_ysets)
+        
+        # finally, update that line's data with
+        line.set_data(all_xsets[line_num][0], all_ysets[line_num][1])
+        
+        
+    return lines
 
 
-#time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes) # add text to top left
+anim = animation.FuncAnimation(fig, animate, init_func=init, frames=num_frames, 
+                               interval=10,
+                               fargs=(trajectories, all_xsets, all_ysets, lines))
 
-# init the animation method 
-anim = animation.FuncAnimation(fig, animate, fargs=[trajectories, trajectory_lines], \
-                               frames=num_frames, interval=20, blit=True) 
 
 # save animation
 #anim.save('double_pendulum.gif') 
+plt.show()
 print("Done")
 
 
