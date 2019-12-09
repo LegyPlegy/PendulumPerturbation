@@ -86,13 +86,14 @@ def double_pen(z, t, param):
             
         t - time series
         
-        param 
+        param - global variables
+            [m1, m2, l1, l2, g]
         
     Outputs:
         f - function f(t1dot, t1dotdot, t2dot, t2dotdot)
                 
     """
-    theta1, theta1_dot, theta2, theta2_dotdot = z
+    theta1, T1, theta2, T2 = z
     m1, m2, l1, l2, g = param
     C = np.cos(theta1 - theta2)
     c2 = np.cos(2*theta1 - 2*theta2)
@@ -102,16 +103,24 @@ def double_pen(z, t, param):
 #Simplifications for repetition between ODES for theta1doubledot and theta2doubledot 
 #Four 1st Order Equations for the Coupled Second Order ODEs
     
-    theta1_dot = T1
-    theta2_dot = T2
-    theta1_dotdot = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2))
-    theta2_dotdot = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))
+    T1d = (-g*(2*m1+m2)*np.sin(theta1)-m2*g*S-2*S*m2*((T2**2)*l2+T1**2*l1*C))/(l1*(2*m1+m2-m2*c2))
+    T2d = (2*S*((T1**2)*l1*M+g*M*np.cos(theta1)+(T2**2)*l2*m2*C))/(l2*(2*m1+m2-m2*c2))
     
-    f = [theta1_dot, theta1_dotdot, theta2_dot, theta2_dotdot]
+    f = [T1, T1d, T2, T2d]
     
     return f
 
+#Global Parameters
+#Mass
+m1 = 1
+m2 = 1
 
+#Lengths
+l1 = 1
+l2 = 1
+
+#gravity
+g = 9.8
 def simulate_pendulum(time_series, init_cond, global_settings):
     """
   
