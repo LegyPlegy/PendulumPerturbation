@@ -118,9 +118,8 @@ theta2 = 0.1
 T1 = 0.0
 T2 = 0.0
 t = np.linspace(0, 50, 501)
-z = sp.integrate.odeint(double_pen,global_constants, t, args=(g, m1, m2, l1, l2))
-def simulate_pendulum(time_series, init_cond, global_settings):
-    """
+z = sp.integrate.odeint(double_pen,global_constants, t)
+'''
  
     a method that simulates the trajectory of ONE pendulum for a given
     init cond and time series
@@ -143,8 +142,7 @@ def simulate_pendulum(time_series, init_cond, global_settings):
                 [2xn array] a 2D array where column 1 and 2 contain the final 
                 trajectory for θ1 and θ2, where n is the total steps
                 
-    """
-            
+'''             
 
 
 
