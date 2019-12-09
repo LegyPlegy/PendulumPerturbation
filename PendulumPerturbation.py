@@ -76,7 +76,7 @@ global_constants = (g, m1, m2, l1, l2)
 ===============================================================================     
 '''
 
-def double_pen(z, t, param):
+def double_pen(z, t, m1, m2, l1, l2, g):
     """
     Defines the diff eq for the double pendulum
     
@@ -94,7 +94,6 @@ def double_pen(z, t, param):
                 
     """
     theta1, T1, theta2, T2 = z
-    m1, m2, l1, l2, g = param
     C = np.cos(theta1 - theta2)
     c2 = np.cos(2*theta1 - 2*theta2)
     S = np.sin(theta1-theta2)
@@ -118,7 +117,8 @@ theta2 = 0.1
 T1 = 0.0
 T2 = 0.0
 t = np.linspace(0, 50, 501)
-z = sp.integrate.odeint(double_pen,global_constants, t)
+y0 = theta1, theta2, T1, T2
+z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
 '''
  
     a method that simulates the trajectory of ONE pendulum for a given
