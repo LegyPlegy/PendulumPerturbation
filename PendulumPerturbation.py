@@ -63,7 +63,7 @@ global_constants = (g, m1, m2, l1, l2)
 
 
 num_frames = 100
-num_pendulums = 1
+num_pendulums = 3
 
 
 '''
@@ -113,15 +113,32 @@ def double_pen(z, t, m1, m2, l1, l2, g):
 
 # Initial Conditions
 # theta1 and theta2 assign the inital angle of the double pendulum
-theta1 = 15
-theta2 = 0.1
+theta1 = 1
+theta2 = 0
 #T1 and T2 are the initial velocities
 T1 = 0.0
 T2 = 0.0
-t = np.linspace(0, 50, 501)
+t = np.linspace(0, 500, 10000)
 y0 = [theta1, theta2, T1, T2]
 z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
 
+
+# call our method to make some pendulum trajectories
+trajectories = []
+for num in range(num_pendulums):
+    y0[0] += 0.01  # increase theta 1 by 0.1 rad every time
+    z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
+    
+    # unpack our theta 1 and theta 2
+    theta1, theta2 = z[:,0], z[:,2]
+    x1 = global_constants[3] * np.sin(theta1)
+    y1 = -global_constants[4] * np.cos(theta1)
+    
+    x2 = x1 + global_constants[4] * np.sin(theta2)
+    y2 = y1 - global_constants[4] * np.cos(theta2)
+    trajectories.append((x2, y2))
+    
+    
 '''
  
     a method that simulates the trajectory of ONE pendulum for a given
@@ -196,25 +213,8 @@ ax.grid()  # add grid to figure
 # first, create a series of line objects and store them
 lines = []
 for index in range(num_pendulums):
-    lobj = ax.plot([],[],lw=3)[0]
+    lobj = ax.plot([],[],lw=2, alpha=0.5)[0]
     lines.append(lobj)
-
-# call our method to make some pendulum trajectories
-trajectories = []
-for num in range(num_pendulums):
-    y0[0] += 0.1  # increase theta 1 by 0.1 rad every time
-    z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
-    
-    # unpack our theta 1 and theta 2
-    theta1, theta2 = z[:,0], z[:,2]
-    x1 = global_constants[3] * np.sin(theta1)
-    y1 = -global_constants[4] * np.cos(theta1)
-    
-    x2 = x1 + global_constants[4] * np.sin(theta2)
-    y2 = y1 - global_constants[4] * np.cos(theta2)
-    plt.plot(x1, y1)
-    plt.plot(x2, y2)
-    trajectories.append((x1, y1))
 
 
 # create an initializer to empty every line object
@@ -241,33 +241,41 @@ def animate(i, data_list, all_xsets, all_ysets, lines):
         idk, it's used inside FuncAnimate
     """
     
-    
+    # update the dataset for each line object dynamically
     for line_num, line in enumerate(lines):
         # extract data from data-list
-        next_xval = data_list[line_num][0][i]
-        next_yval = data_list[line_num][1][i]
+        next_x1val = data_list[line_num][0][i]
+        next_y1val = data_list[line_num][1][i]
+        #print(next_yval)
         
         # store that into each line's designated "all_xset" and "all_yset"
-        all_xsets[line_num][0].append(next_xval)
-        all_ysets[line_num][1].append(next_yval)
-        len(all_ysets)
+        all_xsets[line_num].append(next_x1val)
+        all_ysets[line_num].append(next_y1val)
         
-        # finally, update that line's data with
-        line.set_data(all_xsets[line_num][0], all_ysets[line_num][1])
+        # get rid of old traces to declutter graph
+        if len(all_xsets[line_num]) >= 100:
+            del all_xsets[line_num][0:50]
+            del all_ysets[line_num][0:50]
+        
+        print(len(all_xsets[line_num]), next_x1val)
+        
+        
+        # finally, dynamically update that line's data with extracted values
+        line.set_data(all_xsets[line_num], all_ysets[line_num])
+        
         
         
     return lines
 
 
-anim = animation.FuncAnimation(fig, animate, init_func=init, frames=num_frames, 
-                               interval=10,
+anim = animation.FuncAnimation(fig, animate, init_func=init, frames=num_frames*10, 
+                               interval=20,
                                fargs=(trajectories, all_xsets, all_ysets, lines))
 
 
 # save animation
 #anim.save('double_pendulum.gif') 
 plt.show()
-print("Done")
 
 
 
