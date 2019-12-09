@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import scipy as sp
 from time import time
-
+from scipy import integrate
 
 
 '''
@@ -110,20 +110,18 @@ def double_pen(z, t, param):
     
     return f
 
-#Global Parameters
-#Mass
-m1 = 1
-m2 = 1
-
-#Lengths
-l1 = 1
-l2 = 1
-
-#gravity
-g = 9.8
+# Initial Conditions
+# theta1 and theta2 assign the inital angle of the double pendulum
+theta1 = 0.1
+theta2 = 0.1
+#T1 and T2 are the initial velocities
+T1 = 0.0
+T2 = 0.0
+t = np.linspace(0, 50, 501)
+z = sp.integrate.odeint(double_pen,global_constants, t, args=(g, m1, m2, l1, l2))
 def simulate_pendulum(time_series, init_cond, global_settings):
     """
-  
+ 
     a method that simulates the trajectory of ONE pendulum for a given
     init cond and time series
         
@@ -146,11 +144,6 @@ def simulate_pendulum(time_series, init_cond, global_settings):
                 trajectory for θ1 and θ2, where n is the total steps
                 
     """
-    
-        
-    sim_trajectory = [0, 1, 2]  # contains computed values for f(θ1) and f(θ2) 
-    
-    return sim_trajectory
             
 
 
