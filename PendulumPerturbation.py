@@ -62,6 +62,7 @@ g = 9.81  # gravitational acceleration
 global_constants = (g, m1, m2, l1, l2)
 
 
+num_frames = 100
 
 
 '''
@@ -191,41 +192,45 @@ def init():
     time_text.set_text('')  # make sure time is 0 at the beginning
     return line, time_text
 
-def animate(i):
+
+
+def animate(i, data_list):
     """used for FuncAnimation: this is iterated over i frames"""
     
-    # define function and store in xdata and ydata, iterating over i
-    t = 0.1*i
-    x = t*np.sin(t) 
-    y = t*np.cos(t) 
-    xdata.append(x) 
-    ydata.append(y) 
-    
+    print(i)
     # update the line with new data
-    line.set_data(xdata, ydata) 
+    line.set_data(data_list[0][0][:i], data_list[0][1][:i])
     
     # keep track of time
-    time_text.set_text("time = {0:.2f}s".format(t) )
+    #time_text.set_text("time = {0:.2f}s".format(t))
     
     return line, time_text
 
+
 # create figure 
 fig = plt.figure() 
-ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
-                     xlim=(-50, 50), ylim=(-50, 50))  
+ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, xlim=(-10, 10), ylim=(-10, 10))  
 ax.grid()  # add grid to figure
 
-# now, begin our animation
+# create fake data
+omegas, trajectories = [2, 5, 9], []
+t = np.linspace(0, 5*np.pi, num_frames)
+
+for omega in omegas:
+    # trajectories is a list of 2 arrays, the first being sinAt and second being cosAt
+    trajectories.append((t*np.sin(omega*t), t*np.cos(omega*t)))
+
+
+# begin our animation
 line, = ax.plot([], [], lw=2)  # required for FuncAnimation
 time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes) # add text to top left
 
-# begin the animation method
-xdata, ydata = [], []  # store data in here
-anim = animation.FuncAnimation(fig, animate, init_func=init, 
-							frames=500, interval=20, blit=True) 
+# init the animation method 
+anim = animation.FuncAnimation(fig, animate, init_func=init, fargs=[trajectories], frames=num_frames, interval=20, blit=True) 
 
 # save animation
 anim.save('double_pendulum.gif') 
 print("Done")
+
 
 
