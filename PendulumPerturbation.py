@@ -159,6 +159,9 @@ def lyapunov_exp(ref_pend, crazy_pend, num_pend, time):
     
     delta = np.abs(ref_pend_dist - crazy_pend_dist) 
     
+    if time == 0: # do not divide by zero!
+        time += 0.00001
+    
     lyapunov = np.log(delta)/time #lyapunov exponent
    
     return lyapunov
@@ -267,14 +270,15 @@ def animate(i, data_list, all_xsets, all_ysets, lines, time_text, lyapunov_text)
     lyapunov = lyapunov_exp(base_pendulum, crazy_pendulum, num_pendulums, t[i])
     
     # update the text every frame
-    time_text.set_text("Time [s]: {:.3f}".format(t[i]))
+    time_text.set_text("Time [s]: {:.2f}".format(t[i]))
     lyapunov_text.set_text("Largest Lyapunov: {:.3f}".format(lyapunov))
     
         
     return lines
 
 
-anim = animation.FuncAnimation(fig, animate, init_func=init, interval=30, 
+anim = animation.FuncAnimation(fig, animate, init_func=init, interval=38,
+                               save_count=sys.maxsize,
                                fargs=(trajectories, all_xsets, all_ysets, 
                                       lines, time_text, lyapunov_text))
 
@@ -282,7 +286,7 @@ anim = animation.FuncAnimation(fig, animate, init_func=init, interval=30,
 
 
 # save animation
-#anim.save('double_pendulum.gif') 
+anim.save('double_pendulum.gif') 
 plt.show()
 
 
