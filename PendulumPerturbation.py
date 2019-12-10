@@ -38,7 +38,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import scipy as sp
-from time import time
 from scipy import integrate
 
 
@@ -62,9 +61,20 @@ g = 9.81  # gravitational acceleration
 global_constants = (g, m1, m2, l1, l2)
 
 
+# amount to dither the initial conditions by
+
+perturbation = 0.005
+
 num_frames = 100
 num_pendulums = 3
 
+# Initial Conditions
+# theta1 and theta2 assign the inital angle of the double pendulum, degrees
+theta1 = 70 - (num_pendulums*perturbation*0.5)  # have 90 as the center 
+theta2 = 0
+#T1 and T2 are the initial velocities
+T1 = 0.0
+T2 = 0.0
 
 '''
 ===============================================================================
@@ -111,58 +121,9 @@ def double_pen(z, t, m1, m2, l1, l2, g):
     
     return f
 
-# Initial Conditions
-# theta1 and theta2 assign the inital angle of the double pendulum
-theta1 = 1
-theta2 = 0
-#T1 and T2 are the initial velocities
-T1 = 0.0
-T2 = 0.0
-t = np.linspace(0, 500, 10000)
+t = np.linspace(0, 25, 500)
 y0 = [theta1, theta2, T1, T2]
 z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
-
-
-# call our method to make some pendulum trajectories
-trajectories = []
-for num in range(num_pendulums):
-    y0[0] += 0.01  # increase theta 1 by 0.1 rad every time
-    z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
-    
-    # unpack our theta 1 and theta 2
-    theta1, theta2 = z[:,0], z[:,2]
-    x1 = global_constants[3] * np.sin(theta1)
-    y1 = -global_constants[4] * np.cos(theta1)
-    
-    x2 = x1 + global_constants[4] * np.sin(theta2)
-    y2 = y1 - global_constants[4] * np.cos(theta2)
-    trajectories.append((x2, y2))
-    
-    
-'''
- 
-    a method that simulates the trajectory of ONE pendulum for a given
-    init cond and time series
-        
-        Inputs - 
-            time_series: 
-                [float array] a numpy array containing time steps
-                created using numpy.linspace
-              
-            init_cond: 
-                [tuple] a tuple of the form (Є1, Є2) where 
-                Є1 is shift in θ1 and Є2 is shift in θ2
-                
-            global_settings: 
-                [tuple] a tuple containing the simulation parameters
-                        see section [0] for more info
-  
-        Outputs -
-            sim_trajectory:
-                [2xn array] a 2D array where column 1 and 2 contain the final 
-                trajectory for θ1 and θ2, where n is the total steps
-                
-'''             
 
 
 
@@ -181,10 +142,22 @@ for num in range(num_pendulums):
 ===============================================================================
 '''
 
-def lyapunov_exp(sim_trajectory, time):
+def lyapunov_exp(ref_pend, crazy_pend, num_pend, time):
+    '''
+    Inputs:    
+        ref_pend - trajectory of pendulum with baseline init 
+        crazy_pend - pendulum with highest perturbation (ref_pend + n*perturbation)
+        num_pend - the number of pendulums
+        time - time series for plotting
+        
+    Outputs:
+        lyapunov exponent
+    '''
+
+    ref_pend_dist = np.sqrt(ref_pend[0]**2 + ref_pend[1]**2)
+    crazy_pend_dist = np.sqrt(crazy_pend[0]**2 + crazy_pend[1]**2)
     
-    delta = np.abs(sim_trajectory[1]-sim_trajectory[0]) 
-    # takes the difference between trajectories f(θ1) and f(θ2)
+    delta = np.abs(ref_pend_dist - crazy_pend_dist) 
     
     lyapunov = np.log(delta)/time #lyapunov exponent
    
@@ -209,6 +182,8 @@ fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, 
                      xlim=(-2, 2), ylim=(-2, 2))  
 ax.grid()  # add grid to figure
+plt.title("Pendulum Perturbation")
+
 
 # first, create a series of line objects and store them
 lines = []
@@ -216,6 +191,26 @@ for index in range(num_pendulums):
     lobj = ax.plot([],[],lw=2, alpha=0.5)[0]
     lines.append(lobj)
 
+# call our method to make some pendulum trajectories
+trajectories = []
+for num in range(num_pendulums):
+    y0[0] += perturbation  # increase theta 1 by 0.1 rad every time
+    
+    # generate trajectories using odeint
+    z = sp.integrate.odeint(double_pen, y0, t, args = (global_constants))
+    
+    # unpack our theta 1 and theta 2
+    theta1, theta2 = z[:,0], z[:,2]
+    x1 = global_constants[3] * np.sin(theta1)
+    y1 = -global_constants[4] * np.cos(theta1)
+    
+    x2 = x1 + global_constants[4] * np.sin(theta2)
+    y2 = y1 - global_constants[4] * np.cos(theta2)
+    trajectories.append((x2, y2))
+    
+# create text objects for 
+time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes) # add text to top left
+lyapunov_text = ax.text(0.02, 0.90, '', transform=ax.transAxes)
 
 # create an initializer to empty every line object
 def init():
@@ -230,7 +225,7 @@ for line in lines:
     all_ysets.append([])
 
 # create our animation function, that updates every line object every frame
-def animate(i, data_list, all_xsets, all_ysets, lines):
+def animate(i, data_list, all_xsets, all_ysets, lines, time_text, lyapunov_text):
     """
     Inputs:
         i - variable used to animate in FuncAnimate
@@ -244,37 +239,52 @@ def animate(i, data_list, all_xsets, all_ysets, lines):
     # update the dataset for each line object dynamically
     for line_num, line in enumerate(lines):
         # extract data from data-list
-        next_x1val = data_list[line_num][0][i]
-        next_y1val = data_list[line_num][1][i]
+        next_xval = data_list[line_num][0][i]
+        next_yval = data_list[line_num][1][i]
         #print(next_yval)
         
         # store that into each line's designated "all_xset" and "all_yset"
-        all_xsets[line_num].append(next_x1val)
-        all_ysets[line_num].append(next_y1val)
+        all_xsets[line_num].append(next_xval)
+        all_ysets[line_num].append(next_yval)
         
         # get rid of old traces to declutter graph
-        if len(all_xsets[line_num]) >= 100:
+        if len(all_xsets[line_num]) >= 200:
             del all_xsets[line_num][0:50]
             del all_ysets[line_num][0:50]
         
-        print(len(all_xsets[line_num]), next_x1val)
-        
-        
+        #print(len(all_xsets[line_num]), next_xval)
+                
         # finally, dynamically update that line's data with extracted values
         line.set_data(all_xsets[line_num], all_ysets[line_num])
         
+        # calculate lyapunov exponent every frame
+        # use furthest pendulum and the base pendulum
         
+        if line_num == (num_pendulums-1)/2:  # base pendulum
+            base_pendulum = (next_xval, next_yval)
+        if line_num == num_pendulums-1:
+            crazy_pendulum = (next_xval, next_yval)
+        
+    lyapunov = lyapunov_exp(base_pendulum, crazy_pendulum, num_pendulums, t[i])
+    
+    # update the text every frame
+    time_text.set_text("Time [s]: {:.3f}".format(t[i]))
+    lyapunov_text.set_text("Largest Lyapunov: {:.3f}".format(lyapunov))
+    
         
     return lines
 
 
-anim = animation.FuncAnimation(fig, animate, init_func=init, frames=num_frames*10, 
-                               interval=20,
-                               fargs=(trajectories, all_xsets, all_ysets, lines))
+anim = animation.FuncAnimation(fig, animate, init_func=init, interval=30, 
+                               fargs=(trajectories, all_xsets, all_ysets, 
+                                      lines, time_text, lyapunov_text))
+
+
 
 
 # save animation
 #anim.save('double_pendulum.gif') 
+plt.legend()
 plt.show()
 
 
