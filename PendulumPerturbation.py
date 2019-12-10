@@ -65,8 +65,8 @@ global_constants = (g, m1, m2, l1, l2)
 
 perturbation = 0.005
 
-num_frames = 100
-num_pendulums = 3
+#num_frames = 100
+num_pendulums = 7
 
 # Initial Conditions
 # theta1 and theta2 assign the inital angle of the double pendulum, degrees
@@ -177,12 +177,13 @@ def lyapunov_exp(ref_pend, crazy_pend, num_pend, time):
         nxn plot of realtime pendulums
 ===============================================================================
 '''
+
 # create figure 
 fig = plt.figure() 
 ax = fig.add_subplot(111, aspect='equal', autoscale_on=False, 
                      xlim=(-2, 2), ylim=(-2, 2))  
 ax.grid()  # add grid to figure
-plt.title("Pendulum Perturbation")
+plt.title("Lower Half of Double Pendulum: Trajectory Analysis")
 
 
 # first, create a series of line objects and store them
@@ -241,7 +242,6 @@ def animate(i, data_list, all_xsets, all_ysets, lines, time_text, lyapunov_text)
         # extract data from data-list
         next_xval = data_list[line_num][0][i]
         next_yval = data_list[line_num][1][i]
-        #print(next_yval)
         
         # store that into each line's designated "all_xset" and "all_yset"
         all_xsets[line_num].append(next_xval)
@@ -252,7 +252,6 @@ def animate(i, data_list, all_xsets, all_ysets, lines, time_text, lyapunov_text)
             del all_xsets[line_num][0:50]
             del all_ysets[line_num][0:50]
         
-        #print(len(all_xsets[line_num]), next_xval)
                 
         # finally, dynamically update that line's data with extracted values
         line.set_data(all_xsets[line_num], all_ysets[line_num])
@@ -284,7 +283,6 @@ anim = animation.FuncAnimation(fig, animate, init_func=init, interval=30,
 
 # save animation
 #anim.save('double_pendulum.gif') 
-plt.legend()
 plt.show()
 
 
